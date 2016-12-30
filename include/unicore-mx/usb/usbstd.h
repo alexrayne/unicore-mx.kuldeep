@@ -63,6 +63,17 @@ struct usb_setup_data {
 /* Class Definition */
 #define USB_CLASS_VENDOR			0xFF
 
+#define USB_VID_STMICRO             0x0483
+#define USB_PID_STMICRO_MSC         0x5720
+#define USB_PID_STMICRO_CDC         0x5740
+
+
+//*  Microsoft manifests this class for composite devices 
+//*  described by interface assiciated descrs - IADs
+#define USB_CLASS_COMPOSITE     0xEF
+#define USB_COMPOSITE_SUBCLASS  0x02
+#define USB_COMPOSITE_PROTOCOL  0x01
+
 /* bmRequestType bit definitions */
 /* bit 7 : direction */
 #define USB_REQ_TYPE_DIRECTION			0x80
