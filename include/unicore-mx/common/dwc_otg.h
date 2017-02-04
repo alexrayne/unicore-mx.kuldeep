@@ -98,8 +98,13 @@
 
 #define DWC_OTG_GOTGINT(base) MMIO32((base) + (0x004))
 
-// OTG AHB configuration register
+// Session end detected. The core sets this bit to indicate that the level of the voltage
+// on VBUS is no longer valid for a B-Peripheral session when VBUS < 0.8 V //STM32F4
+#define DWC_OTG_GOTGINT_SEDET_SHIFT (2)
+#define DWC_OTG_GOTGINT_SEDET (1 << DWC_OTG_GOTGINT_SEDET_SHIFT)
 
+
+// OTG AHB configuration register
 #define DWC_OTG_GAHBCFG(base) MMIO32((base) + (0x008))
 
 #define DWC_OTG_GAHBCFG_GINT_SHIFT (0)
@@ -115,7 +120,6 @@
 
 
 // OTG USB configuration register
-
 #define DWC_OTG_GUSBCFG(base) MMIO32((base) + (0x00C))
 
 #define DWC_OTG_GUSBCFG_CTXPKT_SHIFT (31)
@@ -191,7 +195,6 @@
 
 
 // OTG reset register
-
 #define DWC_OTG_GRSTCTL(base) MMIO32((base) + (0x010))
 
 #define DWC_OTG_GRSTCTL_AHBIDL_SHIFT (31)
@@ -226,7 +229,6 @@
 
 
 // OTG interrupt status register
-
 #define DWC_OTG_GINTSTS(base) MMIO32((base) + (0x014))
 
 #define DWC_OTG_GINTSTS_WKUPINT_SHIFT (31)
@@ -334,7 +336,6 @@
 
 
 // OTG interrupt mask register
-
 #define DWC_OTG_GINTMSK(base) MMIO32((base) + (0x018))
 
 #define DWC_OTG_GINTMSK_MMISM_SHIFT (1)
@@ -444,7 +445,6 @@
 #define DWC_OTG_GRXSTSR(base) MMIO32((base) + (0x01C))
 
 // OTG Receive Status Pop Register
-
 #define DWC_OTG_GRXSTSP(base) MMIO32((base) + (0x020))
 
 #define DWC_OTG_GRXSTSP_FRMNUM_SHIFT (21)
@@ -542,7 +542,6 @@
 #define DWC_OTG_GHWCFG2(base) MMIO32((base) + (0x048))
 
 // Number of device endpoints
-
 #define DWC_OTG_GHWCFG2_NUMHSTCHNL_SHIFT (14)
 #define DWC_OTG_GHWCFG2_NUMHSTCHNL_MASK (0xf << (DWC_OTG_GHWCFG2_NUMHSTCHNL_SHIFT))
 #define DWC_OTG_GHWCFG2_NUMHSTCHNL(v) (((v) << (DWC_OTG_GHWCFG2_NUMHSTCHNL_SHIFT)) & (DWC_OTG_GHWCFG2_NUMHSTCHNL_MASK))
@@ -558,7 +557,6 @@
 #define DWC_OTG_GHWCFG3(base) MMIO32((base) + (0x04C))
 
 // DFIFO Depth
-
 #define DWC_OTG_GHWCFG3_DFIFODEPTH_SHIFT (16)
 #define DWC_OTG_GHWCFG3_DFIFODEPTH_MASK (0xfffful << (DWC_OTG_GHWCFG3_DFIFODEPTH_SHIFT))
 #define DWC_OTG_GHWCFG3_DFIFODEPTH(v) (((v) << (DWC_OTG_GHWCFG3_DFIFODEPTH_SHIFT)) & (DWC_OTG_GHWCFG3_DFIFODEPTH_MASK))
@@ -566,7 +564,6 @@
 
 
 // Width of Packet Size Counters (Actual = value + 4)
-
 #define DWC_OTG_GHWCFG3_PKTSIZEWIDTH_SHIFT (4)
 #define DWC_OTG_GHWCFG3_PKTSIZEWIDTH_MASK (0x7 << (DWC_OTG_GHWCFG3_PKTSIZEWIDTH_SHIFT))
 #define DWC_OTG_GHWCFG3_PKTSIZEWIDTH(v) (((v) << (DWC_OTG_GHWCFG3_PKTSIZEWIDTH_SHIFT)) & (DWC_OTG_GHWCFG3_PKTSIZEWIDTH_MASK))
@@ -574,7 +571,6 @@
 
 
 // Width of Transfer Size Counters (Actual = value + 11)
-
 #define DWC_OTG_GHWCFG3_XFERSIZEWIDTH_SHIFT (0)
 #define DWC_OTG_GHWCFG3_XFERSIZEWIDTH_MASK (0xf << (DWC_OTG_GHWCFG3_XFERSIZEWIDTH_SHIFT))
 #define DWC_OTG_GHWCFG3_XFERSIZEWIDTH(v) (((v) << (DWC_OTG_GHWCFG3_XFERSIZEWIDTH_SHIFT)) & (DWC_OTG_GHWCFG3_XFERSIZEWIDTH_MASK))
@@ -584,7 +580,6 @@
 #define DWC_OTG_GHWCFG4(base) MMIO32((base) + (0x050))
 
 // OTG Host periodic transmit FIFO size register
-
 #define DWC_OTG_HPTXFSIZ(base) MMIO32((base) + (0x100))
 
 #define DWC_OTG_HPTXFSIZ_PTXFD_SHIFT (16)
@@ -614,9 +609,7 @@
 
 
 // Host-mode Control and Status Registers
-
 // OTG Host Configuration Register
-
 #define DWC_OTG_HCFG(base) MMIO32((base) + (0x400))
 
 #define DWC_OTG_HCFG_FSLSS_SHIFT (2)
@@ -640,7 +633,6 @@
 
 
 // OTG Host frame number/frame time remaining register
-
 #define DWC_OTG_HFNUM(base) MMIO32((base) + (0x408))
 
 #define DWC_OTG_HFNUM_FTREM_SHIFT (16)
@@ -656,7 +648,6 @@
 
 
 // OTG Host periodic transmit FIFO/queue status
-
 #define DWC_OTG_HPTXSTS(base) MMIO32((base) + (0x410))
 
 #define DWC_OTG_HPTXSTS_PTXQTOP_SHIFT (24)
@@ -688,15 +679,12 @@
 
 
 // OTG Host all channels interrupt register
-
 #define DWC_OTG_HAINT(base) MMIO32((base) + (0x414))
 
 // OTG Host all channels interrupt mask register
-
 #define DWC_OTG_HAINTMSK(base) MMIO32((base) + (0x418))
 
 // OTG Host port control and status register
-
 #define DWC_OTG_HPRT(base) MMIO32((base) + (0x440))
 
 #define DWC_OTG_HPRT_PSPD_SHIFT (17)
@@ -769,7 +757,6 @@
 
 
 // OTG Host channel-x characteristics register
-
 #define DWC_OTG_HCxCHAR(base, x) MMIO32((base) + (0x500) + (0x20*(x)))
 
 #define DWC_OTG_HCCHAR_CHENA_SHIFT (31)
@@ -834,7 +821,6 @@
 
 
 // OTG host channel-x split control register
-
 #define DWC_OTG_HCxSPLT(base, x) MMIO32((base) + (0x504) + (0x20*(x)))
 
 #define DWC_OTG_HCSPLT_SPLITEN_SHIFT (31)
@@ -864,7 +850,6 @@
 
 
 // OTG Host channel-x interrupt register
-
 #define DWC_OTG_HCxINT(base, x) MMIO32((base) + (0x508) + (0x20*(x)))
 
 #define DWC_OTG_HCINT_DTERR_SHIFT (10)
@@ -884,7 +869,6 @@
 
 
 // Note: NYET: Only in High Speed
-
 #define DWC_OTG_HCINT_NYET_SHIFT (6)
 #define DWC_OTG_HCINT_NYET (1 << DWC_OTG_HCINT_NYET_SHIFT)
 
@@ -902,7 +886,6 @@
 
 
 // Note: AHBERR: Only in High Speed
-
 #define DWC_OTG_HCINT_AHBERR_SHIFT (2)
 #define DWC_OTG_HCINT_AHBERR (1 << DWC_OTG_HCINT_AHBERR_SHIFT)
 
@@ -916,7 +899,6 @@
 
 
 // OTG Host channel-x interrupt mask register
-
 #define DWC_OTG_HCxINTMSK(base, x) MMIO32((base) + (0x50C) + (0x20*(x)))
 
 #define DWC_OTG_HCINTMSK_DTERRM_SHIFT (10)
@@ -936,7 +918,6 @@
 
 
 // Note: NYET: Only in High Speed
-
 #define DWC_OTG_HCINTMSK_NYET_SHIFT (6)
 #define DWC_OTG_HCINTMSK_NYET (1 << DWC_OTG_HCINTMSK_NYET_SHIFT)
 
@@ -954,7 +935,6 @@
 
 
 // Note: AHBERR: Only in High Speed
-
 #define DWC_OTG_HCINTMSK_AHBERR_SHIFT (2)
 #define DWC_OTG_HCINTMSK_AHBERR (1 << DWC_OTG_HCINTMSK_AHBERR_SHIFT)
 
@@ -968,7 +948,6 @@
 
 
 // OTG Host channel-x transfer size register
-
 #define DWC_OTG_HCxTSIZ(base, x) MMIO32((base) + (0x510) + (0x20*(x)))
 
 #define DWC_OTG_HCTSIZ_DOPING_SHIFT (31)
@@ -1062,7 +1041,6 @@
 
 
 // Device mode status register
-
 #define DWC_OTG_DSTS(base) MMIO32((base) + (0x808))
 
 #define DWC_OTG_DSTS_FNSOF_SHIFT (8)
@@ -1090,7 +1068,6 @@
 
 
 // OTG Device IN Endpoint Common Interrupt Mask Register
-
 #define DWC_OTG_DIEPMSK(base) MMIO32((base) + (0x810))
 
 #define DWC_OTG_DIEPMSK_BIM_SHIFT (9)
@@ -1126,7 +1103,6 @@
 
 
 // OTG Device OUT Endpoint Common Interrupt Mask Register
-
 #define DWC_OTG_DOEPMSK(base) MMIO32((base) + (0x814))
 
 #define DWC_OTG_DOEPMSK_BBLERR_SHIFT (12)
@@ -1204,7 +1180,6 @@
 #define DWC_OTG_DEACHINTMSK(base) MMIO32((base) + (0x83C))
 
 // OTG device each in endpoint-1 interrupt register
-
 #define DWC_OTG_DIEPEACHMSK1(base) MMIO32((base) + (0x844))
 
 #define DWC_OTG_DIEPEACHMSK1_NAKM_SHIFT (13)
@@ -1240,7 +1215,6 @@
 
 
 // OTG device each OUT endpoint-1 interrupt register
-
 #define DWC_OTG_DOEPEACHMSK1(base) MMIO32((base) + (0x884))
 
 #define DWC_OTG_DOEPEACHMSK1_NYETM_SHIFT (14)
@@ -1276,7 +1250,6 @@
 
 
 // OTG Device Control IN Endpoint x Control Register
-
 #define DWC_OTG_DIEPxCTL(base, x) MMIO32((base) + (0x900) + (0x20*(x)))
 
 #define DWC_OTG_DIEPCTL_EPENA_SHIFT (31)
@@ -1354,7 +1327,6 @@
 
 
 // OTG Device IN Endpoint Interrupt Register
-
 #define DWC_OTG_DIEPxINT(base, x) MMIO32((base) + (0x908) + (0x20*(x)))
 
 #define DWC_OTG_DIEPINT_TXFE_SHIFT (7)
@@ -1382,7 +1354,6 @@
 
 
 // OTG Device IN Endpoint x Transfer Size Register
-
 #define DWC_OTG_DIEPxTSIZ(base, x) MMIO32((base) + (0x910) + (0x20*(x)))
 
 #define DWC_OTG_DIEPTSIZ_MC_SHIFT (29)
@@ -1417,7 +1388,6 @@
 
 
 // OTG Device Control OUT Endpoint x Control Register
-
 #define DWC_OTG_DOEPxCTL(base, x) MMIO32((base) + (0xB00) + (0x20*(x)))
 
 #define DWC_OTG_DOEPCTL_EPENA_SHIFT (31)
@@ -1493,7 +1463,6 @@
 
 
 // OTG Device IN Endpoint Interrupt Register
-
 #define DWC_OTG_DOEPxINT(base, x) MMIO32((base) + (0xB08) + (0x20*(x)))
 
 #define DWC_OTG_DOEPINT_BBLERR_SHIFT (12)
@@ -1521,7 +1490,6 @@
 
 
 // OTG Device OUT Endpoint x Transfer Size Register
-
 #define DWC_OTG_DOEPxTSIZ(base, x) MMIO32((base) + (0xB10) + (0x20*(x)))
 
 #define DWC_OTG_DOEPTSIZ_STUPCNT_SHIFT (29)
@@ -1616,7 +1584,6 @@
 
 
 // OTG Device Control OUT Endpoint 0 Control Register
-
 #define DWC_OTG_DOEP0CTL(base) MMIO32((base) + (0xB00))
 
 #define DWC_OTG_DOEP0CTL_EPENA_SHIFT (31)
@@ -1693,11 +1660,28 @@
 
 
 // Power and clock gating control and status register
-
 #define DWC_OTG_PCGCCTL(base) MMIO32((base) + (0xE00))
 
-// Data FIFO
+// Stop PHY clock. The application sets this bit to stop the PHY clock when the USB is suspended, the session
+// is not valid, or the device is disconnected.
+// The application clears this bit when the USB is resumed or a new session starts //STM32F4
+#define DWC_OTG_PCGCCTL_STPPCLK_SHIFT (0)
+#define DWC_OTG_PCGCCTL_STPPCLK (1 << DWC_OTG_PCGCCTL_STPPCLK_SHIFT)
 
+
+// Gate HCLK. The application sets this bit to gate HCLK to modules other than the AHB Slave and Master
+// and wakeup logic when the USB is suspended or the session is not valid.
+// The application clears this bit when the USB is resumed or a new session starts. //STM32F4
+#define DWC_OTG_PCGCCTL_GATEHCLK_SHIFT (1)
+#define DWC_OTG_PCGCCTL_GATEHCLK (1 << DWC_OTG_PCGCCTL_GATEHCLK_SHIFT)
+
+
+// Indicates that the PHY has been suspended.
+#define DWC_OTG_PCGCCTL_PHYSUSP_SHIFT (4)
+#define DWC_OTG_PCGCCTL_PHYSUSP (1 << DWC_OTG_PCGCCTL_PHYSUSP_SHIFT)
+
+
+// Data FIFO
 #define DWC_OTG_FIFO(base, x) MMIO32((base) + (0x1000) + ((x) << 12))
 
 
