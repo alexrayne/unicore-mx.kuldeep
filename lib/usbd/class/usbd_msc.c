@@ -28,6 +28,10 @@
 #include "../usbd_private.h"
 #include <unicore-mx/usb/byteorder.h>
 
+#ifndef USB_VSETUP_MSC
+#define USB_VSETUP_MSC USB_VSETUP
+#endif
+
 /*
  * TODO:
  * - Removable media support
@@ -233,6 +237,8 @@ static void scsi_write_10(usbd_msc *ms,
 		trans->current_block = 0;
 
 		trans->bytes_to_recv = trans->block_count << 9;
+		USBD_LOGF_LN(USB_MSC, "SCSI: write10 lba%x * %x"
+		                    , trans->lba_start, trans->block_count);
 	}
 }
 
@@ -251,6 +257,8 @@ static void scsi_read_10(usbd_msc *ms,
 		/* both are in terms of 512 byte blocks, so shift by 9 */
 		trans->bytes_to_send = trans->block_count << 9;
 
+		USBD_LOGF_LN(USB_MSC, "SCSI: read10 lba%x * %x"
+		                    , trans->lba_start, trans->block_count);
 		set_sbc_status_good(ms);
 	}
 }
@@ -946,15 +954,15 @@ bool usbd_msc_setup_ep0(usbd_msc *ms,
 	const uint8_t value = USB_REQ_TYPE_CLASS | USB_REQ_TYPE_INTERFACE;
 
 	if ((setup_data->bmRequestType & mask) == value) {
-		USBD_LOGF(USB_VSETUP, "USB:MSC:Req %x ", (int)setup_data->bRequest);
+		USBD_LOGF(USB_VSETUP_MSC, "USB:MSC:Req %x ", (int)setup_data->bRequest);
 		switch (setup_data->bRequest) {
 		case USB_MSC_REQ_BULK_ONLY_RESET:
-			USBD_LOG(USB_VSETUP,"BULK_ONLY_RESET\n");
+			USBD_LOG(USB_VSETUP_MSC,"BULK_ONLY_RESET\n");
 			/* Do any special reset code here. */
 			usbd_ep0_transfer(dev, setup_data, NULL, 0, NULL);
 		return true;
 		case USB_MSC_REQ_GET_MAX_LUN: {
-			USBD_LOG(USB_VSETUP,"MAX_LUN 0\n");
+			USBD_LOG(USB_VSETUP_MSC,"MAX_LUN 0\n");
 			/* Return the number of LUNs.  We use 0. */
 			static const uint8_t res = 0;
 			usbd_ep0_transfer(dev, setup_data, (void *) &res,

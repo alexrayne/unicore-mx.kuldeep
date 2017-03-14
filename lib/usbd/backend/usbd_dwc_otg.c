@@ -267,6 +267,8 @@ void dwc_otg_ep_prepare(usbd_device *dev, uint8_t addr,
 	if (IS_IN_ENDPOINT(addr)) {
 		/* FIXME: underflow */
 		dev->private_data.fifo_remaining -= fifo_word; /* IN */
+		USBD_LOGF_LN(USB_VIO_INIT, "USBD: EP%dIN avail %x"
+		                         , num, REBASE(DWC_OTG_DIEPxTXFSTS, num) );
 
 		REBASE(DWC_OTG_DIEPxTXF, num) = DWC_OTG_DIEPTXF_INEPTXFD(fifo_word) |
 					DWC_OTG_DIEPTXF_INEPTXSA(dev->private_data.fifo_remaining);
@@ -274,6 +276,10 @@ void dwc_otg_ep_prepare(usbd_device *dev, uint8_t addr,
 		REBASE(DWC_OTG_DIEPxCTL, num) = DWC_OTG_DIEPCTL_SNAK |
 						DWC_OTG_DIEPCTL_SD0PID | eptyp_map[type] |
 						DWC_OTG_DIEPCTL_USBAEP | DWC_OTG_DIEPCTL_TXFNUM(num);
+
+		USBD_LOGF_LN(USB_VIO_INIT, "USBD: EP%dIN assign at %x[%x] avail %x"
+		                         , num, dev->private_data.fifo_remaining, fifo_word
+		                         , REBASE(DWC_OTG_DIEPxTXFSTS, num) );
 	} else {
 		if (type == USBD_EP_CONTROL) {
 			dev->private_data.fifo_rx_usage_overall += 13; /* Setup */
@@ -413,8 +419,8 @@ static void urb_to_fifo_1pkt(usbd_device *dev, usbd_urb *urb)
 	size_t rem_len = transfer->length - transfer->transferred;
 
 	if (!rem_len) {
-		USBD_LOGF_LN(USB_VURB, "No more data to send URB %"PRIu64" (ep0x%"PRIx8") "
-			"(intending ZLP?)", urb->id, transfer->ep_addr);
+		USBD_LOGF_LN(USB_VURB, "No more data to send URB %"PRIurb" (ep0x%"PRIx8") "
+			"(intending ZLP?)", view_urbid(urb->id), transfer->ep_addr);
 		return;
 	}
 
@@ -974,10 +980,10 @@ static void process_out_endpoint_interrupt(usbd_device *dev, uint8_t ep_num)
 	if (REBASE(DWC_OTG_DOEPxINT, ep_num) & DWC_OTG_DOEPINT_XFRC) {
 		REBASE(DWC_OTG_DOEPxINT, ep_num) = DWC_OTG_DOEPINT_XFRC;
 
-		USBD_LOGF_LN(USB_VIO, "Transfer Complete: ep0x%"PRIx8, ep_addr);
 		usbd_urb *urb = usbd_find_active_urb(dev, ep_addr);
 
 		if (is_ep_prematured(dev, ep_addr)) {
+			USBD_LOGF_LN(USB_VIO, "Transfer ommit prematured Complete: ep0x%"PRIx8, ep_addr);
 			if (urb != NULL){
 				//* ommit this RXC and restart current URB
 				REBASE(DWC_OTG_DOEP0TSIZ) = DWC_OTG_DOEP0TSIZ_STUPCNT_3 |
@@ -991,6 +997,7 @@ static void process_out_endpoint_interrupt(usbd_device *dev, uint8_t ep_num)
 		else
 		if (!ep_num && urb != NULL && dev->private_data.ep0tsiz_pktcnt) {
 			/* We are still expecting data! */
+			USBD_LOGF_LN(USB_VIO, "Transfer chunk Complete: ep0x%"PRIx8, ep_addr);
 
 			dev->private_data.ep0tsiz_pktcnt--;
 
@@ -1000,6 +1007,7 @@ static void process_out_endpoint_interrupt(usbd_device *dev, uint8_t ep_num)
 
 			REBASE(DWC_OTG_DOEP0CTL) |= DWC_OTG_DOEP0CTL_EPENA;
 		} else {
+			USBD_LOGF_LN(USB_VIO, "Transfer Complete: ep0x%"PRIx8, ep_addr);
 			/* Set NAK on the endpoint */
 			REBASE(DWC_OTG_DOEPxCTL, ep_num) |= DWC_OTG_DOEPCTL_SNAK;
 
@@ -1049,6 +1057,7 @@ static inline void alloc_fifo_for_ep0_only(usbd_device *dev)
 void dwc_otg_poll(usbd_device *dev)
 {
 	if (REBASE(DWC_OTG_GINTSTS) & DWC_OTG_GINTSTS_ENUMDNE) {
+		USBD_LOG_LN(USB_VIO_INIT,"USBD:enumerated");
 		REBASE(DWC_OTG_DCFG) &= ~DWC_OTG_DCFG_DAD_MASK;
 		disable_all_non_ep0(dev);
 		alloc_fifo_for_ep0_only(dev);
