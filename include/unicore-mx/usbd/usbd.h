@@ -194,7 +194,8 @@ enum usbd_ep_flags {
 	USBD_EP_PACKET_PER_FRAME_MASK = (0x3 << 2)
 };
 
-typedef enum usbd_ep_flags usbd_ep_flags;
+//typedef enum usbd_ep_flags usbd_ep_flags;
+typedef unsigned usbd_ep_flags;
 
 /**
  * USB Transfer flags
