@@ -245,13 +245,6 @@ void usbd_enable(usbd_device *dev, bool onoff){
 
 #if defined(USBD_DEBUG)
 void usbd_log_call(const char *fname){
-	USBD_LOG(USB_VALL, "inside ");
-	USBD_LOG_LN(USB_VALL, fname);
-}
-#endif
-
-#if defined(USBD_DEBUG)
-void usbd_log_call(const char *fname){
 	USBD_LOGF_LN(USB_VALL, "inside %s" , fname);
 }
 #endif
