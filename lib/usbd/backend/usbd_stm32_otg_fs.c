@@ -29,7 +29,7 @@
 
 static usbd_device *init(const usbd_backend_config *config);
 static bool otgfs_is_powered(usbd_device *dev);
-static void otgfs_power_control(usbd_device *dev, usbd_power_action action);
+static usbd_power_status otgfs_power_control(usbd_device *dev, usbd_power_action action);
 
 static struct usbd_device _usbd_dev;
 
@@ -78,8 +78,12 @@ static usbd_device *init(const usbd_backend_config *config)
 	_usbd_dev.backend = &usbd_stm32_otg_fs;
 	_usbd_dev.config = config;
 
+	//* stm32f4 use FS CID=0x1100, HS CID=0x02000600
+	//* stm32f7            0x3000,    CID=0x00003100
+	const unsigned otg_hs_cid_boundary = 0x3000;
+
 	if (config->feature & USBD_VBUS_SENSE) {
-		if (OTG_FS_CID >= 0x00002000) { /* 2.0 HS core*/
+		if (OTG_FS_CID >= otg_hs_cid_boundary) { /* 2.0 HS core*/
 			/* Enable VBUS detection */
 			OTG_FS_GCCFG |= OTG_GCCFG_VBDEN;
 		} else { /* 1.x  FS core*/
@@ -87,7 +91,7 @@ static usbd_device *init(const usbd_backend_config *config)
 			OTG_FS_GCCFG |= OTG_GCCFG_VBUSBSEN;
 		}
 	} else {
-		if (OTG_FS_CID >= 0x00002000) { /* 2.0 */
+		if (OTG_FS_CID >= otg_hs_cid_boundary) { /* 2.0 */
 			/* Disable VBUS detection. */
 			OTG_FS_GCCFG &= ~OTG_GCCFG_VBDEN;
 			REBASE(DWC_OTG_GOTGCTL) |= DWC_OTG_GOTGCTL_BVALOEN |
@@ -120,21 +124,37 @@ bool otgfs_is_powered(usbd_device *dev){
 }
 
 static
-void otgfs_power_control(usbd_device *dev, usbd_power_action action){
+usbd_power_status otgfs_power_control(usbd_device *dev, usbd_power_action action){
 	uint32_t base = dev->backend->base_address;
 	switch (action){
 		case usbd_paActivate:{
 			DWC_OTG_PCGCCTL(base) = 0;
 			OTG_FS_GCCFG |= OTG_GCCFG_PWRDWN;
+			REBASE(DWC_OTG_GINTMSK) |= DWC_OTG_GINTMSK_ENUMDNEM | DWC_OTG_GINTSTS_USBSUSP
+			                        | DWC_OTG_GINTMSK_RXFLVLM | DWC_OTG_GINTMSK_IEPINT ;
 			break;
 		}
 		case usbd_paShutdown: {
 		/* Wait for AHB idle. */
 			while (( (DWC_OTG_GRSTCTL(base) & DWC_OTG_GRSTCTL_AHBIDL) == 0) );
+			//* drop ISRs, cause stoped Core cant handle them
+			REBASE(DWC_OTG_GINTSTS) = ~( DWC_OTG_GINTSTS_USBSUSP
+			                           | DWC_OTG_GINTSTS_WKUPINT
+			                           | DWC_OTG_GINTSTS_SRQINT
+			                           );
+			REBASE(DWC_OTG_GINTMSK) &= ~( DWC_OTG_GINTMSK_ENUMDNEM 
+			                             | DWC_OTG_GINTMSK_RXFLVLM | DWC_OTG_GINTMSK_IEPINT
+			                            );
 			//poser down PHY
 			OTG_FS_GCCFG &= ~OTG_GCCFG_PWRDWN;
 			DWC_OTG_PCGCCTL(base) = DWC_OTG_PCGCCTL_STPPCLK; //| DWC_OTG_PCGCCTL_GATEHCLK ;
 			break;
 		}
 	}
+	usbd_power_status res = 0;
+	if ( (DWC_OTG_PCGCCTL(base) & DWC_OTG_PCGCCTL_PHYSUSP) == 0)
+		res |= usbd_psPHYOn;
+	if ((OTG_FS_GCCFG & OTG_GCCFG_PWRDWN) != 0)
+		res |= usbd_psCoreEnabled;
+	return res;
 }

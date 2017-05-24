@@ -137,12 +137,12 @@ typedef enum usbd_speed usbd_speed;
 
 	/** Optional features */
 enum usbd_backend_features{
-		USBD_FEATURE_NONE = 0,
-		USBD_PHY_EXT = (1 << 0),
-		USBD_VBUS_SENSE = (1 << 1),
-		USBD_VBUS_EXT = (1 << 2)
+		  USBD_FEATURE_NONE   = 0
+		, USBD_PHY_EXT        = (1 << 0)
+		, USBD_VBUS_SENSE     = (1 << 1)
+		, USBD_VBUS_EXT       = (1 << 2)
 		//* provide usb-core auto power-up/down on connect/disconnect
-		, USBD_USE_POWERDOWN		= (1<<3)
+		, USBD_USE_POWERDOWN  = (1 << 3)
 };
 
 struct usbd_backend_config {
@@ -676,6 +676,14 @@ bool usbd_is_vbus(usbd_device *dev);
  *                     false disable PHY and stops usb-core
  */
 void usbd_enable(usbd_device *dev, bool onoff);
+
+/**
+ * Checks power state of usb-core and PHY
+ * @param[in] dev USB Device
+ * @param[in] \return  true  - device in action, and power PHY
+ *                     false - disabled PHY and stops usb-core
+ */
+bool usbd_is_enabled(usbd_device *dev);
 
 /**
  * Perform a transfer

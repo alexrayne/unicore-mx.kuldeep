@@ -1063,6 +1063,8 @@ static inline void alloc_fifo_for_ep0_only(usbd_device *dev)
 
 void dwc_otg_poll(usbd_device *dev)
 {
+	if (usbd_is_enabled(dev)){
+
 	if (REBASE(DWC_OTG_GINTSTS) & DWC_OTG_GINTSTS_ENUMDNE) {
 		USBD_LOG_LN(USB_VIO_INIT,"USBD:enumerated");
 		REBASE(DWC_OTG_DCFG) &= ~DWC_OTG_DCFG_DAD_MASK;
@@ -1118,14 +1120,22 @@ void dwc_otg_poll(usbd_device *dev)
 		usbd_handle_suspend(dev);
 	}
 
-	if (REBASE(DWC_OTG_GINTSTS) & DWC_OTG_GINTSTS_WKUPINT) {
-		REBASE(DWC_OTG_GINTSTS) = DWC_OTG_GINTSTS_WKUPINT;
-		usbd_handle_resume(dev);
-	}
-
 	if (REBASE(DWC_OTG_GINTSTS) & DWC_OTG_GINTSTS_SOF) {
 		REBASE(DWC_OTG_GINTSTS) = DWC_OTG_GINTSTS_SOF;
 		usbd_handle_sof(dev);
+	}
+
+	} //if (usbd_is_enabled(dev))
+	else
+		REBASE(DWC_OTG_GINTSTS) = DWC_OTG_GINTSTS_ENUMDNE | DWC_OTG_GINTSTS_USBRST
+	                          | DWC_OTG_GINTSTS_RXFLVL
+	                          | DWC_OTG_GINTSTS_IEPINT | DWC_OTG_GINTSTS_OEPINT
+	                          | DWC_OTG_GINTSTS_SOF 
+	                          | DWC_OTG_GINTSTS_USBSUSP | DWC_OTG_GINTSTS_ESUSP;
+	
+	if (REBASE(DWC_OTG_GINTSTS) & DWC_OTG_GINTSTS_WKUPINT) {
+		REBASE(DWC_OTG_GINTSTS) = DWC_OTG_GINTSTS_WKUPINT;
+		usbd_handle_resume(dev);
 	}
 
 	if ( (REBASE(DWC_OTG_GINTSTS) & (DWC_OTG_GINTSTS_SRQINT)) != 0) {

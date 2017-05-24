@@ -235,9 +235,16 @@ bool usbd_is_vbus(usbd_device *dev){
 
 void usbd_enable(usbd_device *dev, bool onoff){
 	if (!onoff)
-		usbd_disconnect(dev, false);
+		usbd_disconnect(dev, true);
 	if (dev->backend->power_control)
 		dev->backend->power_control(dev, (onoff)? usbd_paActivate : usbd_paShutdown );
+}
+
+bool usbd_is_enabled(usbd_device *dev){
+	if (dev->backend->power_control)
+		return dev->backend->power_control(dev, usbd_paCheck ) == usbd_psOn;
+	else
+		return true;
 }
 
 
