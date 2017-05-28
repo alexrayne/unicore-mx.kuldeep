@@ -529,6 +529,9 @@ void usbd_urb_complete(usbd_device *dev, usbd_urb *urb,
 {
 	USBD_LOGF_LN(USB_VURB, "URB %"PRIurb" on ep0x%"PRIx8" complete\n"
 	                     , view_urbid(urb->id), urb->transfer.ep_addr);
+	//* this allows to ommit urb_cancel on ep in detaching
+	mark_ep_as_free(dev, urb->transfer.ep_addr, true);
+
 	detach_from_active(dev, urb);
 	urb_callback(dev, urb, status);
 	unused_push(dev, urb);
